@@ -1,0 +1,19 @@
+[project]
+name = "tinyorch"
+version = "0.0.1"
+description = "A tiny, zero-dependency orchestrator for single-node streaming pipelines."
+readme = "README.md"
+authors = [{ name = "Murilegus", email = "murilegus@outlook.com" }]
+license = "MIT"
+requires-python = ">=3.12"
+classifiers = ["Development Status :: 1 - Planning"]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/murilegus/tinyorch"
+Repository = "https://github.com/murilegus/tinyorch"
+Issues = "https://github.com/murilegus/tinyorch/issues"
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14.0"]
+build-backend = "uv_build"

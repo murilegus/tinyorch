@@ -1,0 +1,20 @@
+{
+    "recommendations": [
+        "charliermarsh.ruff",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "ms-python.debugpy",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "tamasfe.even-better-toml",
+    ],
+    "unwantedRecommendations": [
+        // Using Ruff instead
+        "ms-pyright.pyright",
+        "ms-python.black-formatter",
+        "ms-python.flake8",
+        "ms-python.isort",
+        "ms-python.mypy-type-checker",
+        "ms-python.pylint"
+    ]
+}
