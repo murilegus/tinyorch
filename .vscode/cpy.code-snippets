@@ -1,0 +1,24 @@
+{
+  "SPDX copyright header (Python)": {
+    "scope": "python",
+    "prefix": ["spdx", "license"],
+    "body": [
+      "# SPDX-FileCopyrightText: © $CURRENT_YEAR Murilegus <murilegus@outlook.com>",
+      "# SPDX-License-Identifier: MIT",
+      "",
+      "$0"
+    ],
+    "description": "Insert SPDX copyright + license header at top of Python file"
+  },
+  "SPDX copyright header (TOML/YAML/INI/Dockerfile)": {
+    "scope": "toml,yaml,ini,dockerfile,shellscript",
+    "prefix": ["spdx", "license"],
+    "body": [
+      "# SPDX-FileCopyrightText: © $CURRENT_YEAR Murilegus <murilegus@outlook.com>",
+      "# SPDX-License-Identifier: MIT",
+      "",
+      "$0"
+    ],
+    "description": "Insert SPDX copyright + license header"
+  },
+}

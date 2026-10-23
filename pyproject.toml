@@ -9,6 +9,14 @@ requires-python = ">=3.12"
 classifiers = ["Development Status :: 1 - Planning"]
 dependencies = []
 
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.2",
+]
+
 [project.urls]
 Homepage = "https://github.com/murilegus/tinyorch"
 Repository = "https://github.com/murilegus/tinyorch"
@@ -17,3 +25,32 @@ Issues = "https://github.com/murilegus/tinyorch/issues"
 [build-system]
 requires = ["uv_build>=0.13.1,<0.14.0"]
 build-backend = "uv_build"
+
+[tool.basedpyright]
+strict = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "D",
+  "COM812",
+  "ISC001",
+]
+
+[tool.ruff.lint.flake8-copyright]
+notice-rgx = "(?i)SPDX-FileCopyrightText:\\s+©?\\s*\\d{4}"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "ANN", "PLR2004", "EM", "TRY003"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["tinyorch"]
