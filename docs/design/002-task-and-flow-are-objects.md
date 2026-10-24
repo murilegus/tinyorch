@@ -65,7 +65,7 @@ Details fixed by this decision:
   `SyncTask[P, R]` and `AsyncTask[P, R]` with `@overload`s on `task()`, so
   `await fetch(...)` types without casts. Deferred until the runner
   (phase 2) shows whether it needs to distinguish the two anyway.
-  Tracked in #2.
+  Tracked in [#2](https://github.com/murilegus/tinyorch/issues/2).
 - Pickling `Task` instances is not supported yet; moving tasks to worker
   processes will require a registry keyed by the same `(module, qualname)`
   identity rather than pickling the object.
