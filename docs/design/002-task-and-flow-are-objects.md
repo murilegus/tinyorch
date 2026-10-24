@@ -45,8 +45,9 @@ Details fixed by this decision:
   wraps `await fn(...)`; all bookkeeping (entering the run, recording the
   call) happens *inside* that coroutine. Doing it in `__call__` would run
   before the user's body executes and reset the context too early (see
-  ADR-001). The return type of `__call__` for the async case is reconciled
-  with a single `typing.cast`; a later phase may replace it with overloads.
+  ADR-001). Typing of the async case requires two `cast`s: one on the
+  wrapped coroutine (`Awaitable[object]`) and one on the coroutine returned
+  to the caller (`R`). See Consequences.
 - `TaskCall` is a mutable dataclass: it is created when the task starts and
   updated with `ended_at` / `error` when it finishes. No consumer currently
   needs immutability; if persistence requires it, switch to
@@ -59,6 +60,12 @@ Details fixed by this decision:
 - `functools.partial` of an async function and bound methods are reported as
   non-coroutine by `inspect.iscoroutinefunction`; such callables are treated
   as sync. Documented as a known limitation for this phase.
+- `Task.__call__` needs two `cast`s because a single `Task[P, R]` cannot
+  express "R is a coroutine when fn is async". Candidate fix: split into
+  `SyncTask[P, R]` and `AsyncTask[P, R]` with `@overload`s on `task()`, so
+  `await fetch(...)` types without casts. Deferred until the runner
+  (phase 2) shows whether it needs to distinguish the two anyway.
+  Tracked in [#2](https://github.com/murilegus/tinyorch/issues/2).
 - Pickling `Task` instances is not supported yet; moving tasks to worker
   processes will require a registry keyed by the same `(module, qualname)`
   identity rather than pickling the object.
