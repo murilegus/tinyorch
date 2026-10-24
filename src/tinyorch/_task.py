@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import inspect
 import time
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, override
 
 from tinyorch._context import RunContext, TaskCall, current_run
 
@@ -15,14 +15,14 @@ if TYPE_CHECKING:
 
 class Task[**P, R]:
     def __init__(self, fn: Callable[P, R], *, name: str | None = None) -> None:
-        self.fn = fn
-        self.name = name or self.fn.__name__
-        self.is_async = inspect.iscoroutinefunction(fn)
-        self.__name__ = fn.__name__
-        self.__qualname__ = fn.__qualname__
-        self.__module__ = fn.__module__
-        self.__doc__ = fn.__doc__
-        self.__wrapped__ = fn
+        self.fn: Callable[P, R] = fn
+        self.name: str = name or self.fn.__name__
+        self.is_async: bool = inspect.iscoroutinefunction(fn)
+        self.__name__: str = fn.__name__
+        self.__qualname__: str = fn.__qualname__
+        self.__module__: str = fn.__module__
+        self.__doc__: str | None = fn.__doc__
+        self.__wrapped__: Callable[P, R] = fn
 
     def __call__(self, *args: P.args, **kwargs: P.kwargs) -> R:
         if self.is_async:
@@ -70,10 +70,12 @@ class Task[**P, R]:
     def _key(self) -> tuple[str, str]:
         return (self.fn.__module__, self.fn.__qualname__)
 
+    @override
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Task):
             return NotImplemented
         return self._key == other._key
 
+    @override
     def __hash__(self) -> int:
         return hash(self._key)

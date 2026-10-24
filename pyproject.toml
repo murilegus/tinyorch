@@ -5,19 +5,20 @@ description = "A tiny, zero-dependency orchestrator for single-node streaming pi
 readme = "README.md"
 authors = [{ name = "Murilegus", email = "murilegus@outlook.com" }]
 license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "License :: OSI Approved :: MIT License",
     "Typing :: Typed",
 ]
 dependencies = []
 
 [dependency-groups]
 dev = [
+    "basedpyright>=1.40.2",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
@@ -34,7 +35,13 @@ requires = ["uv_build>=0.13.1,<0.14.0"]
 build-backend = "uv_build"
 
 [tool.basedpyright]
-strict = ["src"]
+include = ["src", "tests"]
+typeCheckingMode = "strict"
+failOnWarnings = true
+
+[[tool.basedpyright.executionEnvironments]]
+root = "tests"
+reportPrivateUsage = false
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
