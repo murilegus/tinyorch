@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import functools
 import inspect
 import time
 from typing import TYPE_CHECKING, cast
@@ -19,7 +18,11 @@ class Task[**P, R]:
         self.fn = fn
         self.name = name or self.fn.__name__
         self.is_async = inspect.iscoroutinefunction(fn)
-        functools.update_wrapper(self, fn)
+        self.__name__ = fn.__name__
+        self.__qualname__ = fn.__qualname__
+        self.__module__ = fn.__module__
+        self.__doc__ = fn.__doc__
+        self.__wrapped__ = fn
 
     def __call__(self, *args: P.args, **kwargs: P.kwargs) -> R:
         if self.is_async:
