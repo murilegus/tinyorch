@@ -6,7 +6,14 @@ readme = "README.md"
 authors = [{ name = "Murilegus", email = "murilegus@outlook.com" }]
 license = "MIT"
 requires-python = ">=3.12"
-classifiers = ["Development Status :: 1 - Planning"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Typing :: Typed",
+]
 dependencies = []
 
 [dependency-groups]
