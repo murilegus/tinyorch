@@ -9,12 +9,14 @@ from tinyorch._context import _enter_run, current_run
 
 
 def test_enter_run():
-    with _enter_run("a"):
-        ctx = current_run()
-        assert ctx is not None
-        assert ctx.flow_name == "a"
+    with _enter_run("f") as ctx:
+        assert current_run() is ctx
+        assert ctx.flow_name == "f"
+        assert ctx.ended_at is None
 
     assert current_run() is None
+    assert ctx.ended_at is not None
+    assert ctx.error is None
 
 
 def test_enter_run_nested():
@@ -31,10 +33,12 @@ def test_enter_run_nested():
 
 
 def test_reset_ctx_on_exception():
-    with pytest.raises(ValueError, match="boom"), _enter_run("a"):
+    with pytest.raises(ValueError, match="boom"), _enter_run("f") as ctx:
         raise ValueError("boom")
 
     assert current_run() is None
+    assert isinstance(ctx.error, ValueError)
+    assert ctx.ended_at is not None
 
 
 async def test_isolated_between_tasks():

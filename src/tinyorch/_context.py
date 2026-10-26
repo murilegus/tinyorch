@@ -20,6 +20,8 @@ class RunContext:
     run_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     started_at: float = field(default_factory=time.monotonic)
     calls: list[TaskCall] = field(default_factory=list)
+    ended_at: float | None = None
+    error: BaseException | None = None
     parent: RunContext | None = None
 
 
@@ -44,5 +46,9 @@ def _enter_run(flow_name: str) -> Generator[RunContext, None, None]:
     token = _current.set(ctx)
     try:
         yield ctx
+    except BaseException as exc:
+        ctx.error = exc
+        raise
     finally:
+        ctx.ended_at = time.monotonic()
         _current.reset(token)
