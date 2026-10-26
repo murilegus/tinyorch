@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class Task[**P, R]:
     def __init__(self, fn: Callable[P, R], *, name: str | None = None) -> None:
         self.fn: Callable[P, R] = fn
-        self.name: str = name or self.fn.__name__
+        self.name: str = name or fn.__name__
         self.is_async: bool = inspect.iscoroutinefunction(fn)
         self.__name__: str = fn.__name__
         self.__qualname__: str = fn.__qualname__
