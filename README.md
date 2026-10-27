@@ -24,7 +24,7 @@ from tinyorch import task, flow, current_run
 
 @task
 async def fetch(url: str) -> str:
-    await asyncio.sleep(0.1)          # pretend to hit the network
+    await asyncio.sleep(0.1)  # pretend to hit the network
     return f"<html>{url}</html>"
 
 
@@ -41,7 +41,7 @@ async def crawl(urls: list[str]) -> int:
     return len(run.calls) if run else 0
 
 
-print(asyncio.run(crawl(["a", "b", "c"])))   # 6 task calls recorded
+print(asyncio.run(crawl(["a", "b", "c"])))  # 6 task calls recorded
 ```
 
 A `@task` is a plain callable with metadata: outside a flow it just runs.
