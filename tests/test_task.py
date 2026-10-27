@@ -8,7 +8,7 @@ import inspect
 
 import pytest
 
-from tinyorch._context import _enter_run, current_run
+from tinyorch._context import current_run, enter_run
 from tinyorch._task import Task
 
 
@@ -35,7 +35,7 @@ aboom = Task(_aboom)
 
 
 def test_task_run_sync():
-    with _enter_run("f"):
+    with enter_run("f"):
         assert add(1, 2) == 3
         ctx = current_run()
         assert ctx is not None
@@ -47,7 +47,7 @@ def test_task_run_sync():
 
 
 def test_task_run_sync_on_exception():
-    with _enter_run("f"):
+    with enter_run("f"):
         with pytest.raises(ValueError, match="boom"):
             boom()
 
@@ -59,7 +59,7 @@ def test_task_run_sync_on_exception():
 
 
 async def test_task_run_async():
-    with _enter_run("f"):
+    with enter_run("f"):
         await slow()
         ctx = current_run()
         assert ctx is not None
@@ -69,7 +69,7 @@ async def test_task_run_async():
 
 
 async def test_task_run_async_on_exception():
-    with _enter_run("f"):
+    with enter_run("f"):
         with pytest.raises(ValueError, match="boom"):
             await aboom()
 

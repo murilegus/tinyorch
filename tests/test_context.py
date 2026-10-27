@@ -7,11 +7,11 @@ import asyncio
 
 import pytest
 
-from tinyorch._context import _enter_run, current_run
+from tinyorch._context import current_run, enter_run
 
 
 def test_enter_run():
-    with _enter_run("f") as ctx:
+    with enter_run("f") as ctx:
         assert current_run() is ctx
         assert ctx.flow_name == "f"
         assert ctx.ended_at is None
@@ -22,11 +22,11 @@ def test_enter_run():
 
 
 def test_enter_run_nested():
-    with _enter_run("a"):
+    with enter_run("a"):
         ctx_a = current_run()
         assert ctx_a is not None
 
-        with _enter_run("b"):
+        with enter_run("b"):
             ctx_b = current_run()
             assert ctx_b is not None
             assert ctx_b.parent is ctx_a
@@ -35,7 +35,7 @@ def test_enter_run_nested():
 
 
 def test_reset_ctx_on_exception():
-    with pytest.raises(ValueError, match="boom"), _enter_run("f") as ctx:
+    with pytest.raises(ValueError, match="boom"), enter_run("f") as ctx:
         raise ValueError("boom")
 
     assert current_run() is None
@@ -45,7 +45,7 @@ def test_reset_ctx_on_exception():
 
 async def test_isolated_between_tasks():
     async def worker(name: str) -> str:
-        with _enter_run(name):
+        with enter_run(name):
             await asyncio.sleep(0)
             ctx = current_run()
             assert ctx is not None

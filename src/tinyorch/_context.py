@@ -41,7 +41,7 @@ def current_run() -> RunContext | None:
 
 
 @contextmanager
-def _enter_run(flow_name: str) -> Generator[RunContext, None, None]:
+def enter_run(flow_name: str) -> Generator[RunContext, None, None]:
     ctx = RunContext(flow_name=flow_name, parent=_current.get())
     token = _current.set(ctx)
     try:
