@@ -7,7 +7,48 @@
 
 A tiny, zero-dependency orchestrator for single-node, item-level pipelines.
 
-🚧 **Status**: Phase 1 in progress — `RunContext` and `Task` landed, `@task` / `@flow` decorators next.
+🚧 **Status**: Phase 1 complete — `@task` / `@flow` run sequentially with run
+tracking. No DAG, parallelism, retries or checkpoints yet; those are phase 2–3.
+
+
+## 🚀 Quickstart
+
+```bash
+pip install tinyorch
+```
+
+```python
+import asyncio
+from tinyorch import task, flow, current_run
+
+
+@task
+async def fetch(url: str) -> str:
+    await asyncio.sleep(0.1)  # pretend to hit the network
+    return f"<html>{url}</html>"
+
+
+@task
+def parse(html: str) -> list[str]:
+    return html.split()
+
+
+@flow
+async def crawl(urls: list[str]) -> int:
+    for url in urls:
+        parse(await fetch(url))
+    run = current_run()
+    return len(run.calls) if run else 0
+
+
+print(asyncio.run(crawl(["a", "b", "c"])))  # 6 task calls recorded
+```
+
+A `@task` is a plain callable with metadata: outside a flow it just runs.
+Inside a `@flow`, every call is recorded on the current `RunContext`
+(`current_run()`), which also tracks the flow's own timing and failure.
+Sync and async functions both work; the wrapped signature is preserved for
+type checkers.
 
 
 ## 🤔 Why tinyorch?

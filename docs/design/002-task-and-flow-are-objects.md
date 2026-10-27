@@ -1,6 +1,6 @@
 # ADR-002: `@task` and `@flow` return objects, not wrapped functions
 
-- Status: accepted (implementation lands in `feat/task` and `feat/flow`)
+- Status: accepted (implemented in 0.1.0)
 - Date: 2026-10-24
 - Scope: `tinyorch._task`, `tinyorch._flow`, public decorators
 
@@ -69,3 +69,12 @@ Details fixed by this decision:
 - Pickling `Task` instances is not supported yet; moving tasks to worker
   processes will require a registry keyed by the same `(module, qualname)`
   identity rather than pickling the object.
+- `ParamSpec` preserves parameter names, so `Task[[int, int], int]` is not
+  equal to the type inferred for `def add(a: int, b: int)`. Typing tests
+  therefore assert at call sites (`assert_type(add(1, 2), int)`) and use
+  `# pyright: ignore[...]` negative checks, not `assert_type` on the object.
+- Members of package-private modules (`_context.enter_run`) carry no second
+  underscore; the module name already marks them internal. Public API is
+  whatever `tinyorch.__all__` exports.
+- `RunContext` records `ended_at` and `error`, set by `enter_run()` on exit,
+  so `Flow` needs no try/except of its own.
