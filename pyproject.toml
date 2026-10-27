@@ -41,11 +41,22 @@ failOnWarnings = true
 
 [[tool.basedpyright.executionEnvironments]]
 root = "tests"
-reportPrivateUsage = false
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+addopts = "--cov=tinyorch --cov-report=term-missing --cov-fail-under=95"
+
+[tool.coverage.run]
+branch = true
+source = ["tinyorch"]
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "@overload",
+    "\\.\\.\\.",
+]
 
 [tool.ruff]
 target-version = "py312"
