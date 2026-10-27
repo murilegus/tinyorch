@@ -3,7 +3,7 @@
 [![ci](https://github.com/murilegus/tinyorch/actions/workflows/ci.yml/badge.svg)](https://github.com/murilegus/tinyorch/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/tinyorch)](https://pypi.org/project/tinyorch/)
 [![Python](https://img.shields.io/pypi/pyversions/tinyorch)](https://pypi.org/project/tinyorch/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/murilegus/tinyorch/blob/main/LICENSE)
 
 A tiny, zero-dependency orchestrator for single-node, item-level pipelines.
 
@@ -121,9 +121,7 @@ Progress is tracked in [GitHub milestones](https://github.com/murilegus/tinyorch
 
 ## 📄 Documentation
 
-- [`docs/design/`](docs/design/) — design decisions are recorded as ADRs.
-
-
+- [`docs/design/`](https://github.com/murilegus/tinyorch/tree/main/docs/design) — design decisions are recorded as ADRs.
 ## 🎫 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/murilegus/tinyorch/blob/main/LICENSE) file for details.
