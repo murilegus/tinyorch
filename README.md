@@ -2,14 +2,12 @@
 
 [![ci](https://github.com/murilegus/tinyorch/actions/workflows/ci.yml/badge.svg)](https://github.com/murilegus/tinyorch/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/tinyorch)](https://pypi.org/project/tinyorch/)
-[![Python](https://img.shields.io/badge/python-3.12%20%7C%203.13-blue)](pyproject.toml)
+[![Python](https://img.shields.io/pypi/pyversions/tinyorch)](https://pypi.org/project/tinyorch/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 A tiny, zero-dependency orchestrator for single-node, item-level pipelines.
 
-🚧 **Status**: Phase 1 complete — `@task` / `@flow` run sequentially with run
-tracking. No DAG, parallelism, retries or checkpoints yet; those are phase 2–3.
-
+🚧 **Status**: alpha — phase 1 released (0.1), phase 2 in progress. See [Roadmap](#-roadmap).
 
 ## 🚀 Quickstart
 
@@ -76,7 +74,7 @@ object store) before the next stage starts. tinyorch instead pipelines items
 through stages with bounded buffers and checkpoints each item, so a rerun only
 does what is left and memory stays flat regardless of input size.
 
-![Stage-at-a-time orchestrators vs tinyorch pipelining](docs/assets/stage-vs-pipelined.svg)
+![Stage-at-a-time orchestrators vs tinyorch pipelining](https://raw.githubusercontent.com/murilegus/tinyorch/main/docs/assets/stage-vs-pipelined.svg)
 
 **tinyorch is not a stream processor.** It takes a *bounded* input and
 executes it with streaming semantics. There are no windows, no event time, no
@@ -93,7 +91,7 @@ The core is stdlib-only and defines Protocols; everything that touches the
 outside world (state stores, browsers, LLM clients, CLI) is an adapter shipped
 as an optional extra.
 
-![tinyorch architecture](docs/assets/architecture.svg)
+![tinyorch architecture](https://raw.githubusercontent.com/murilegus/tinyorch/main/docs/assets/architecture.svg)
 
 
 ## 🚫 Non-goals
@@ -106,6 +104,19 @@ as an optional extra.
   run viewer is planned as an optional extra
 - **Time-based backfills** in the Airflow sense — runs are keyed by input, not
   by schedule interval
+
+
+## 🧭 Roadmap
+
+| Phase | Scope | Status |
+|---|---|---|
+| 1 | `@task` / `@flow`, run tracking, typed public API | ✅ 0.1 |
+| 2 | Pipelining: streaming tasks, bounded buffers, concurrent execution | 🚧 next |
+| 3 | Per-item checkpoints, resumable runs, pluggable state store | planned |
+| 4 | Resources with lifecycle and injection; process workers for CPU-bound tasks | planned |
+| 5 | Dogfooding on a real crawl + LLM pipeline; CLI | planned |
+
+Progress is tracked in [GitHub milestones](https://github.com/murilegus/tinyorch/milestones).
 
 
 ## 📄 Documentation
