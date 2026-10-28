@@ -187,8 +187,8 @@ Tác giả chưa dùng Prefect; các claim dưới đây theo hiểu biết củ
 ```python
 @flow
 async def crawl(urls: list[str]) -> list[Doc]:
-    htmls = await fetch.map(urls, concurrency=16)      # list[str]
-    docs  = await parse.map(htmls)                     # list[Doc]
+    htmls = await fetch.map(urls, concurrency=16)  # list[str]
+    docs = await parse.map(htmls)  # list[Doc]
     await store.map(docs, concurrency=4)
     return docs
 ```
@@ -198,11 +198,8 @@ async def crawl(urls: list[str]) -> list[Doc]:
 
 **B. Stage chaining bằng async iterator**
 ```python
-pipe = (source(urls)
-        | fetch.stage(workers=16, buffer=64)
-        | parse.stage()
-        | store.stage(workers=4))
-async for doc in pipe:        # hoặc: await pipe.drain()
+pipe = source(urls) | fetch.stage(workers=16, buffer=64) | parse.stage() | store.stage(workers=4)
+async for doc in pipe:  # hoặc: await pipe.drain()
     ...
 ```
 - Cơ chế: mỗi stage là async generator đọc từ `asyncio.Queue(maxsize=buffer)` của stage trước, `TaskGroup` cho worker, `aclose()`/cancellation lan ngược khi consumer dừng; contextvars propagate vì worker task được tạo *trong* run.
@@ -216,9 +213,10 @@ pipe.stage(fetch, workers=16)
 pipe.stage(parse)
 pipe.stage(store, workers=4, on_error="skip")
 
+
 @flow
 async def crawl() -> Stats:
-    return await pipe.run()          # Stats: per-stage ok/failed/cancelled counts
+    return await pipe.run()  # Stats: per-stage ok/failed/cancelled counts
 ```
 - Cơ chế: như B (queue + TaskGroup + Semaphore), nhưng topology là *dữ liệu* (`list[Stage]`), stage body là `@task` thường `item -> result` (hoặc `item -> Iterable[result]` cho fan-out); source là iterable/async iterable, không phải task.
 - Tương tác #2: `Stage` giữ `SyncTask | AsyncTask`, dispatch tĩnh; không cần generator-kind task.
