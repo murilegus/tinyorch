@@ -9,6 +9,12 @@ A tiny, zero-dependency orchestrator for single-node, item-level pipelines.
 
 🚧 **Status**: alpha — phase 1 released (0.1), phase 2 in progress. See [Roadmap](#-roadmap).
 
+> ⚠️ **What exists today (0.1):** `@task` / `@flow` decorators and in-memory run
+> tracking — nothing more. Pipelining, bounded buffers, per-item resume and
+> resources are **planned, not implemented**. The comparisons and performance
+> claims below describe the design target; **none of them has been benchmarked
+> yet**.
+
 ## 🚀 Quickstart
 
 ```bash
@@ -51,33 +57,42 @@ type checkers.
 
 ## 🤔 Why tinyorch?
 
-tinyorch is for the job that is **too small for Prefect, too finite for Flink,
-and too painful as a bare script**: a few thousand to a few million items
-(URLs, documents, records) flowing through I/O-heavy stages on one machine,
-where any stage can fail halfway.
+tinyorch is aimed at the job that is **too small for Prefect, too finite for
+Flink, and too painful as a bare script**: a few thousand to a few million
+items (URLs, documents, records) flowing through I/O-heavy stages on one
+machine, where any stage can fail halfway.
 
-Three families of tools already exist for pipelines. Each is right for its
-sweet spot and awkward outside it:
+Three families of tools already exist for pipelines. The table below is how
+tinyorch positions itself against them.
 
-| | Workflow orchestrators<br>Airflow · Prefect · Dagster | Stream processors<br>Flink · Bytewax · Faust | Bare script<br>`asyncio.gather` + `tenacity` | **tinyorch** |
+> ⚠️ **Unverified.** The other tools' columns are generalizations from their
+> documentation, not from measurements or side-by-side use, and some cells are
+> coarser than the tools deserve. The **tinyorch** column is the design target
+> for phases 2–4; cells marked *(planned)* are not implemented in 0.1.
+
+| | Workflow orchestrators<br>Airflow · Prefect · Dagster | Stream processors<br>Flink · Bytewax · Faust | Bare script<br>`asyncio.gather` + `tenacity` | **tinyorch** (target) |
 |---|---|---|---|---|
 | Input | bounded, per task | **unbounded**, per event | bounded | bounded, per item |
-| Execution | one stage finishes before the next starts | continuous | ad hoc | pipelined, bounded buffers |
-| Resume after crash | per task / per run | cluster checkpoints | hand-rolled or none | per item |
-| Shared resources (browser, LLM client) | per process, awkward | n/a | manual | first-class |
+| Execution | one stage finishes before the next starts | continuous | ad hoc | pipelined, bounded buffers *(planned, phase 2)* |
+| Resume after crash | per task / per run | cluster checkpoints | hand-rolled or none | per item *(planned, phase 3)* |
+| Shared resources (browser, LLM client) | per process, awkward | n/a | manual | first-class *(planned, phase 4)* |
 | Infra | server + database | cluster | none | none |
-| Sweet spot | multi-team, multi-machine DAGs | 24/7 event streams | one-off | one node, 10³–10⁶ items, crash-prone I/O |
+| Sweet spot | multi-team, multi-machine DAGs | 24/7 event streams | one-off | one node, 10³–10⁶ items, crash-prone I/O *(unmeasured)* |
 
 The architectural difference tinyorch is built around: in a stage-at-a-time
 orchestrator, data crossing a task boundary is materialized (in RAM or an
-object store) before the next stage starts. tinyorch instead pipelines items
-through stages with bounded buffers and checkpoints each item, so a rerun only
-does what is left and memory stays flat regardless of input size.
+object store) before the next stage starts. tinyorch is designed to instead
+pipeline items through stages with bounded buffers and checkpoint each item,
+so that a rerun only does what is left and memory stays flat regardless of
+input size. **This is a design goal, not a measured result**: none of it is
+implemented in 0.1, and no benchmark backs the memory or resume claims yet.
 
 ![Stage-at-a-time orchestrators vs tinyorch pipelining](https://raw.githubusercontent.com/murilegus/tinyorch/main/docs/assets/stage-vs-pipelined.svg)
 
-**tinyorch is not a stream processor.** It takes a *bounded* input and
-executes it with streaming semantics. There are no windows, no event time, no
+*Conceptual diagram of the planned execution model, not a benchmark.*
+
+**tinyorch is not a stream processor.** It is meant to take a *bounded* input
+and execute it with streaming semantics. There are no windows, no event time, no
 unbounded sources, no distributed state. If you need those, use Flink.
 
 **It is not a replacement for Prefect or Airflow either.** When the pipeline
@@ -87,9 +102,11 @@ aims to make that boundary obvious rather than blurry.
 
 ## 🏗️ Architecture
 
-The core is stdlib-only and defines Protocols; everything that touches the
-outside world (state stores, browsers, LLM clients, CLI) is an adapter shipped
-as an optional extra.
+**Planned architecture** — today only the `@task` / `@flow` core exists; no
+Protocols or adapters have been written yet. The intent: the core is
+stdlib-only and defines Protocols; everything that touches the outside world
+(state stores, browsers, LLM clients, CLI) is an adapter shipped as an
+optional extra.
 
 ![tinyorch architecture](https://raw.githubusercontent.com/murilegus/tinyorch/main/docs/assets/architecture.svg)
 
