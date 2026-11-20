@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-10-24
+- Amended: 2026-11-20 — `_enter_run` renamed to `enter_run` (naming rule in
+  ADR-002); the decision is unchanged
 - Scope: `tinyorch._context`
 
 ## Context
@@ -31,10 +33,10 @@ must therefore be isolated per asyncio task, not just per thread.
 
 ## Decision
 
-Use a single `ContextVar[RunContext | None]`, set by `_enter_run()` and read
+Use a single `ContextVar[RunContext | None]`, set by `enter_run()` and read
 by `current_run()`.
 
-- `_enter_run()` is a `@contextmanager` and resets the variable in a
+- `enter_run()` is a `@contextmanager` and resets the variable in a
   `finally` block, so a raising flow body cannot leak its context into the
   next flow on the same task.
 - Nesting is handled by the `ContextVar` token itself: `reset(token)` restores
@@ -50,7 +52,8 @@ implementation the test passes. Temporarily replacing the `ContextVar` with a
 module-level global makes the test fail: the second worker's `set` overwrites
 the first worker's context while it is suspended.
 
-With the global implementation:
+With the global implementation (output captured when the helper was still
+named `_enter_run`):
 
 ```text
 ===================================================== FAILURES ======================================================
