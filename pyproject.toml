@@ -12,6 +12,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Typing :: Typed",
 ]
 dependencies = []
@@ -38,6 +39,9 @@ build-backend = "uv_build"
 include = ["src", "tests"]
 typeCheckingMode = "strict"
 failOnWarnings = true
+# Off by default even in strict; without it a stale `# pyright: ignore[...]`
+# passes silently and the negative checks in tests/test_typing.py guard nothing.
+reportUnnecessaryTypeIgnoreComment = "error"
 
 [[tool.basedpyright.executionEnvironments]]
 root = "tests"
@@ -45,7 +49,9 @@ root = "tests"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-addopts = "--cov=tinyorch --cov-report=term-missing --cov-fail-under=95"
+# The coverage floor is enforced in CI (`pytest --cov-fail-under=95`), not here,
+# so running a single test file locally does not fail on partial coverage.
+addopts = "--cov=tinyorch --cov-report=term-missing"
 
 [tool.coverage.run]
 branch = true
@@ -55,7 +61,7 @@ source = ["tinyorch"]
 exclude_also = [
     "if TYPE_CHECKING:",
     "@overload",
-    "\\.\\.\\.",
+    "^\\s*\\.\\.\\.$",
 ]
 
 [tool.ruff]
