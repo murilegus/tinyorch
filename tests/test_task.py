@@ -4,12 +4,17 @@
 from __future__ import annotations
 
 import asyncio
+import functools
 import inspect
+from typing import TYPE_CHECKING
 
 import pytest
 
 from tinyorch._context import current_run, enter_run
 from tinyorch._task import Task
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator, Callable, Iterator
 
 
 def _add(a: int, b: int) -> int:
@@ -107,3 +112,45 @@ def test_task_outside_run_sync():
 async def test_task_outside_run_async():
     assert current_run() is None
     await slow()
+
+
+def _gen() -> Iterator[int]:
+    yield 1
+
+
+async def _agen() -> AsyncIterator[int]:
+    yield 1
+
+
+class _Callable:
+    def __call__(self) -> int:
+        return 1
+
+    def method(self) -> int:
+        return 2
+
+    async def amethod(self) -> int:
+        return 3
+
+
+@pytest.mark.parametrize("fn", [_gen, _agen])
+def test_task_rejects_generator_functions(fn: Callable[..., object]):
+    with pytest.raises(TypeError, match="does not support generator functions"):
+        Task(fn)
+
+
+@pytest.mark.parametrize("fn", [functools.partial(_add, 1), _Callable(), len])
+def test_task_rejects_non_functions(fn: Callable[..., object]):
+    with pytest.raises(TypeError, match="expects a function defined with"):
+        Task(fn)
+
+
+async def test_task_accepts_bound_methods():
+    obj = _Callable()
+    sync_method = Task(obj.method)
+    async_method = Task(obj.amethod)
+
+    assert sync_method.is_async is False
+    assert async_method.is_async is True
+    assert sync_method() == 2
+    assert await async_method() == 3

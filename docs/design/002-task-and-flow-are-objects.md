@@ -2,6 +2,9 @@
 
 - Status: accepted (implemented in 0.1.0)
 - Date: 2026-10-24
+- Amended: 2026-11-20 — corrected two statements that did not match the code
+  (metadata copying, `partial` / bound-method detection) and recorded the
+  rule for which callables are accepted (0.1.2)
 - Scope: `tinyorch._task`, `tinyorch._flow`, public decorators
 
 ## Context
@@ -33,9 +36,22 @@ cannot be confused.
 
 Details fixed by this decision:
 
-- `functools.update_wrapper(self, fn)` is called in `__init__` so
-  `__doc__`, `__name__`, `__module__` and `__wrapped__` are preserved. As a
-  consequence `Task` and `Flow` do **not** use `__slots__`.
+- `__name__`, `__qualname__`, `__module__`, `__doc__` and `__wrapped__` are
+  copied onto the instance explicitly in `__init__`, not with
+  `functools.update_wrapper`, so that each attribute is declared and typed.
+  `Task` and `Flow` do not use `__slots__` today; nothing in this decision
+  depends on that, and it is left open.
+- Only functions defined with `def` / `async def` and bound methods are
+  accepted (`inspect.isfunction` or `inspect.ismethod`). Anything else —
+  `functools.partial`, an instance with `__call__`, a builtin — raises
+  `TypeError` at decoration time. These objects have no reliable
+  `__name__` / `__qualname__`, which identity and bookkeeping depend on.
+- Generator and async-generator functions raise `TypeError` at decoration
+  time. Calling one only *creates* the generator; the body runs later, when
+  it is iterated, after the bookkeeping has already closed. The recorded
+  call would end immediately and `current_run()` inside the body would be
+  `None` — the same failure as entering the run outside the coroutine
+  (ADR-001), but silent. Whether a stage may `yield` is a phase 2 decision.
 - A `Task` called outside a flow runs its function directly and records
   nothing; inside a flow it appends a `TaskCall` to the current
   `RunContext`. Exceptions are re-raised unchanged to keep the user's
@@ -57,9 +73,14 @@ Details fixed by this decision:
 
 - `isinstance(fetch, Task)` is true and `fetch.name`, `fetch.is_async` are
   public. Users who need the raw function use `fetch.fn` or `fetch.__wrapped__`.
-- `functools.partial` of an async function and bound methods are reported as
-  non-coroutine by `inspect.iscoroutinefunction`; such callables are treated
-  as sync. Documented as a known limitation for this phase.
+- Bound methods are classified correctly: `inspect.iscoroutinefunction`
+  returns `True` for a bound `async def` method. (An earlier version of this
+  ADR said the opposite; that was wrong for Python 3.12.)
+- Known limitation: an `async def` wrapped by a *synchronous* decorator that
+  uses `functools.wraps` is a plain function to `inspect`, so it is treated
+  as sync. Calling it returns an un-awaited coroutine and the recorded call
+  ends at once. Decorate with `@task` innermost, or make the wrapper
+  `async def`.
 - `Task.__call__` needs two `cast`s because a single `Task[P, R]` cannot
   express "R is a coroutine when fn is async". Candidate fix: split into
   `SyncTask[P, R]` and `AsyncTask[P, R]` with `@overload`s on `task()`, so

@@ -13,5 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+      - name: Check that the release tag matches the package version
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version="$(uv version --short)"
+          if [ "${TAG#v}" != "$version" ]; then
+            echo "::error::tag $TAG does not match pyproject version $version"
+            exit 1
+          fi
       - run: uv build
       - uses: pypa/gh-action-pypi-publish@release/v1

@@ -4,13 +4,18 @@
 from __future__ import annotations
 
 import asyncio
+import functools
 import inspect
+from typing import TYPE_CHECKING
 
 import pytest
 
 from tinyorch._context import RunContext, current_run
 from tinyorch._flow import Flow
 from tinyorch._task import Task
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator, Callable, Iterator
 
 seen: list[RunContext | None] = []
 
@@ -126,3 +131,22 @@ def test_flow_identity():
     assert pipeline != outer
     assert pipeline != "pipeline"
     assert len({pipeline, Flow(_pipeline)}) == 1
+
+
+def _gen() -> Iterator[int]:
+    yield 1
+
+
+async def _agen() -> AsyncIterator[int]:
+    yield 1
+
+
+@pytest.mark.parametrize("fn", [_gen, _agen])
+def test_flow_rejects_generator_functions(fn: Callable[..., object]):
+    with pytest.raises(TypeError, match="@flow does not support generator functions"):
+        Flow(fn)
+
+
+def test_flow_rejects_non_functions():
+    with pytest.raises(TypeError, match="@flow expects a function defined with"):
+        Flow(functools.partial(_add, 1))
