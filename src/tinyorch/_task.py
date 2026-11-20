@@ -8,6 +8,7 @@ import time
 from typing import TYPE_CHECKING, cast, override
 
 from tinyorch._context import RunContext, TaskCall, current_run
+from tinyorch._validate import check_wrappable
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 
 class Task[**P, R]:
     def __init__(self, fn: Callable[P, R], *, name: str | None = None) -> None:
+        check_wrappable(fn, "task")
         self.fn: Callable[P, R] = fn
         self.name: str = name or fn.__name__
         self.is_async: bool = inspect.iscoroutinefunction(fn)
